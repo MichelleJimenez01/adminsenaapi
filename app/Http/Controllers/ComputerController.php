@@ -2,65 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\computer;
+use App\Models\Computer;
 use App\Http\Requests\StorecomputerRequest;
 use App\Http\Requests\UpdatecomputerRequest;
 
 class ComputerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+   /**
+     * Lista todos los computadores.
      */
     public function index()
     {
-        //
+        $computers = Computer::included()->get();
+        return response()->json($computers);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Registra un nuevo computador.
      */
-    public function create()
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'number' => 'required|max:50',
+            'brand' => 'required|max:100',
+        ]);
+
+        $computer = Computer::create($request->all());
+
+        return response()->json($computer);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Muestra un computador específico.
      */
-    public function store(StorecomputerRequest $request)
+    public function show($id)
     {
-        //
+        $computer = Computer::included()->findOrFail($id);
+        return response()->json($computer);
     }
 
     /**
-     * Display the specified resource.
+     * Actualiza la información de un computador.
      */
-    public function show(computer $computer)
+    public function update(Request $request, Computer $computer)
     {
-        //
+        $request->validate([
+            'number' => 'required|max:50',
+            'brand' => 'required|max:100',
+        ]);
+
+        $computer->update($request->all());
+
+        return $computer;
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Elimina un computador del sistema.
      */
-    public function edit(computer $computer)
+    public function destroy(Computer $computer)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatecomputerRequest $request, computer $computer)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(computer $computer)
-    {
-        //
+        $computer->delete();
+        return $computer;
     }
 }

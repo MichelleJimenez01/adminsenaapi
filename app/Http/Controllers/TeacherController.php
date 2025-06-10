@@ -2,43 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\teacher;
+use App\Models\Teacher;
 use App\Http\Requests\StoreteacherRequest;
 use App\Http\Requests\UpdateteacherRequest;
 
 class TeacherController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+   /**
+     * Lista todos los docentes con sus relaciones.
      */
     public function index()
     {
-        //
+        $teachers = Teacher::included()->get();
+        return response()->json($teachers);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Registra un nuevo docente.
      */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:teachers,email',
+            'area_id' => 'required|exists:areas,id',
+            'training_center_id' => 'required|exists:training_centers,id',
+        ]);
+
+        $teacher = Teacher::create($request->all());
+
+        return response()->json($teacher);
+    }
+
+    /**
+     * Muestra un docente específico por ID.
+     */
+    public function show($id)
+    {
+        $teacher = Teacher::included()->findOrFail($id);
+        return response()->json($teacher);
+    }
+
+    /**
+     * Actualiza los datos de un docente.
+     */
+    public function update(Request $request, Teacher $teacher)
+    {
+        $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:teachers,email,' . $teacher->id,
+            'area_id' => 'required|exists:areas,id',
+            'training_center_id' => 'required|exists:training_centers,id',
+        ]);
+
+        $teacher->update($request->all());
+
+        return $teacher;
+    }
+
+    /**
+     * Elimina un docente del sistema.
+     */
+    public function destroy(Teacher $teacher)
+    {
+        $teacher->delete();
+        return $teacher;
+    }
+
+
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreteacherRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(teacher $teacher)
-    {
-        //
-    }
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -48,19 +85,5 @@ class TeacherController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateteacherRequest $request, teacher $teacher)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(teacher $teacher)
-    {
-        //
-    }
 }
